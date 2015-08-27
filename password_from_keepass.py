@@ -1,28 +1,3 @@
-"""
-Store this file as `vars_plugins/password_from_keyring.py` and specify the
-following in `ansible.cfg`:
-```
-    [defaults]
-    vars_plugins=./vars_plugins
-```
-In your inventory specify:
-```
-[group1]
-web[01:99].server.lan
-[group1:vars]
-x_auth_system="Old Auth Shell User"
-[group2]
-db[01:10].server.lan
-[group2:vars]
-x_auth_system="New Auth Shell User"
-[shellhosts]
-sh01.server.lan
-another.server.lan x_auth_system="Standard Shell User"
-[all:vars]
-ansible_ask_sudo_pass=true
-x_auth_system="New Auth Shell User"
-```
-"""
 import getpass
 import os
 import sys
