@@ -29,7 +29,7 @@ class VarsModule(object):
 
             if x_auth_system_master_key is None:
                 x_auth_system_master_key = getpass.getpass(prompt = 'Enter keepass vault password: ')
-                host.set_variable('x_auth_system_manster_key', x_auth_system_master_key)
+                host.set_variable('x_auth_system_master_key', x_auth_system_master_key)
 
             ps  = host.get_variables().get("ansible_su_pass")
             if ps is None:
