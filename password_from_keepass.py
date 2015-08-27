@@ -1,3 +1,28 @@
+"""
+Store this file as `vars_plugins/password_from_keyring.py` and specify the
+following in `ansible.cfg`:
+```
+    [defaults]
+    vars_plugins=./vars_plugins
+```
+In your inventory specify:
+```
+[group1]
+web[01:99].server.lan
+[group1:vars]
+x_auth_system="Old Auth Shell User"
+[group2]
+db[01:10].server.lan
+[group2:vars]
+x_auth_system="New Auth Shell User"
+[shellhosts]
+sh01.server.lan
+another.server.lan x_auth_system="Standard Shell User"
+[all:vars]
+ansible_ask_sudo_pass=true
+x_auth_system="New Auth Shell User"
+```
+"""
 import getpass
 import os
 import sys
@@ -20,13 +45,24 @@ class VarsModule(object):
         print "Invoke for %s" % host.name
         if "--ask-su-pass" in sys.argv:
             x_auth_system = host.get_variables().get("x_auth_system")
+            x_auth_system_kdb = host.get_variables().get("x_auth_system_kdb")
+            x_auth_system_master_key = host.get_variables().get("x_auth_system_master_key")
+
+            if x_auth_system_kdb is None:
+                x_auth_system_kdb = raw_input( "Provide full path to keepass kdb file: ")
+                host.set_variable('x_auth_system_kdb', x_auth_system_kdb)
+
+            if x_auth_system_master_key is None:
+                x_auth_system_master_key = getpass.getpass(prompt = 'Enter keepass vault password: ')
+                host.set_variable('x_auth_system_manster_key', x_auth_system_master_key)
+
             ps  = host.get_variables().get("ansible_su_pass")
             if ps is None:
                 if x_auth_system == "keepass":
                     # All interesting begins here!
                     rez = {}
-                    ps = getpass.getpass(prompt = 'Enter keepass vault password: ')
-                    with libkeepass.open( "test.kdbx" , password = ps ) as kdb:
+#                    ps = getpass.getpass(prompt = 'Enter keepass vault password: ')
+                    with libkeepass.open( x_auth_system_kdb , password = x_auth_system_master_key ) as kdb:
                         for el in kdb.obj_root.findall('.//Entry'):
                             uuid =  el.find('UUID').text
                             rez[uuid] = {}
