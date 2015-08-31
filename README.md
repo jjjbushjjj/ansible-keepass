@@ -17,11 +17,15 @@ following in `ansible.cfg`:
 ```
 In your inventory specify:
 ```
+
+For group usage: 
 [all:vars]
 ansible_ask_su_pass=true
 x_auth_system="keepass"
 x_auth_system_kdb="<path to your kdbx file>"
 x_auth_system_master_key="<Your keepass master key>" (This one is a bad idea, don't store master key in cleartext here)
 
+Or per host:
+host1 x_auth_system="keepass" x_auth_system_kdb="<path to your kdbx file>" 
+
 Pretty much all.
-Right now it asks for vault password for each host in you ansible play. I will try to fix this.
