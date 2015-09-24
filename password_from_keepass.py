@@ -18,7 +18,7 @@ class VarsModule(object):
 
     def get_host_vars(self, host, vault_password=None):
         """ Get host specific variables. """
-        print "Host Invoke for %s " % host.name 
+#        print "Host Invoke for %s " % host.name 
         if "--ask-su-pass" in sys.argv: 
             x_auth_system = host.get_variables().get("x_auth_system")
             x_auth_system_kdb = host.get_variables().get("x_auth_system_kdb")
@@ -64,7 +64,7 @@ class VarsModule(object):
 
     def get_group_vars(self, group, vault_password=None):
         """ Get group specific variables. """
-        print "Group Invoke for %s" % group.name
+#        print "Group Invoke for %s" % group.name
         if "--ask-su-pass" in sys.argv: 
             x_auth_system = group.get_variables().get("x_auth_system")
             x_auth_system_kdb = group.get_variables().get("x_auth_system_kdb")
