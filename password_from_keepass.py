@@ -2,6 +2,7 @@ import getpass
 import os
 import sys
 import libkeepass
+import lxml.etree as ET
 
 class VarsModule(object):
 
@@ -39,12 +40,16 @@ class VarsModule(object):
 
                     rez = {}
                     with libkeepass.open( x_auth_system_kdb , password = x_auth_system_master_key ) as kdb:
-                        for el in kdb.obj_root.findall('.//Entry'):
-                            uuid =  el.find('UUID').text
+                        xmldata = ET.fromstring(kdb.pretty_print())
+                        for history in xmldata.xpath(".//History"):
+                            history.getparent().remove(history)
+
+                        for el in xmldata.findall('.//Entry'):
+                            uuid =  el.find('./UUID').text
                             rez[uuid] = {}
-                            for elem in el.findall('.//String'):
-                                key = elem.find('Key').text
-                                val = elem.find('Value').text
+                            for elem in el.findall('./String'):
+                                key = elem.find('./Key').text
+                                val = elem.find('./Value').text
                                 rez[uuid][key] = val
                     for elem in rez.keys():
                         if rez[elem]['Title'] == host.name and rez[elem]['UserName'] == 'root' :
