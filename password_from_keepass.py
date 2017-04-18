@@ -18,17 +18,31 @@ class VarsModule(object):
 
     def get_host_vars(self, host, vault_password=None):
         """ Get host specific variables. """
-#        print "Host Invoke for %s " % host.name 
+#        print "Host Invoke for %s with wars: %s" % (host.name, host.get_vars())
         if "--ask-su-pass" in sys.argv: 
-            x_auth_system = host.get_variables().get("x_auth_system")
-            x_auth_system_kdb = host.get_variables().get("x_auth_system_kdb")
-            x_auth_system_master_key = host.get_variables().get("x_auth_system_master_key")
+
+            # first get vars from groups
+            x_auth_system = host.get_group_vars().get("x_auth_system")
+            x_auth_system_kdb = host.get_group_vars().get("x_auth_system_kdb")
+            x_auth_system_master_key = host.get_group_vars().get("x_auth_system_master_key")
+            # set all from groups or from host
+            if x_auth_system and x_auth_system_kdb and x_auth_system_master_key:
+                host.set_variable('x_auth_system', x_auth_system)
+                host.set_variable('x_auth_system_kdb', x_auth_system_kdb)
+                host.set_variable('x_auth_system_master_key', x_auth_system_master_key)
+            else:
+                x_auth_system = host.get_vars().get("x_auth_system")
+                x_auth_system_kdb = host.get_vars().get("x_auth_system_kdb")
+                x_auth_system_master_key = host.get_vars().get("x_auth_system_master_key")
+
+            # skip hosts without x_auth_system
+            if not x_auth_system:
+                return
+
             passwd = ""
-            ps  = host.get_variables().get("ansible_su_pass")
+            ps  = host.get_vars().get("ansible_su_pass")
             if ps is None:
                 if x_auth_system == "keepass":
-                    x_auth_system_kdb = host.get_variables().get("x_auth_system_kdb")
-                    x_auth_system_master_key = host.get_variables().get("x_auth_system_master_key")
                     if x_auth_system_kdb is None:
                         x_auth_system_kdb = raw_input( "Provide full path to keepass kdb file: ")
                         host.set_variable('x_auth_system_kdb', x_auth_system_kdb)
@@ -64,11 +78,11 @@ class VarsModule(object):
 
     def get_group_vars(self, group, vault_password=None):
         """ Get group specific variables. """
-#        print "Group Invoke for %s" % group.name
+#        print "GROUP: %s VARS: %s" % (group.name, group.get_vars()) 
         if "--ask-su-pass" in sys.argv: 
-            x_auth_system = group.get_variables().get("x_auth_system")
-            x_auth_system_kdb = group.get_variables().get("x_auth_system_kdb")
-            x_auth_system_master_key = group.get_variables().get("x_auth_system_master_key")
+            x_auth_system = group.get_vars().get("x_auth_system")
+            x_auth_system_kdb = group.get_vars().get("x_auth_system_kdb")
+            x_auth_system_master_key = group.get_vars().get("x_auth_system_master_key")
             if x_auth_system == "keepass":
                 if x_auth_system_kdb is None:
                     x_auth_system_kdb = raw_input( "Provide full path to keepass kdb file: ")
@@ -78,7 +92,4 @@ class VarsModule(object):
                     prmt = "Enter keepass vault password for group "+group.name+": "
                     x_auth_system_master_key = getpass.getpass(prompt = prmt)
                     group.set_variable('x_auth_system_master_key', x_auth_system_master_key)
-
-
-
 
